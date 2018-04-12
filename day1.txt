@@ -1,0 +1,121 @@
+优雅的关闭redis
+redis-cli shutdown
+命令：
+keys * 查看所有键
+dbsize 查看键的总数
+exists key 检查键是否存在，存在返回1，否则返回0
+del key 删除键
+del key1 key2 key3 删除多个键
+expire key 10 设置key的过期时间为10s，超过时间自动删除
+ttl key 返回键的过期时间
+type key 返回键的结构类型
+
+字符串（string）命令：
+set key value 为key设置值
+setex/setnx key value 当key不存在时设置key的值，当key存在时忽略
+get key 获取key的值
+mset key1 value1 key2 value2 批量设置key1和key2的值为value1和value2
+mget key1 key2 批量获取key1和key2的值
+incr key 对key进行自增操作
+decr key 对key进行自减操作
+incrby key 10 对key加10
+decrby key 10 对key减10
+append key value 向键key的值的尾部追加值
+strlen key 获取key的值的长度
+getset key value 设置key的值为value并返回原来的值
+setrange key offset value 将key对应的值的第offset的位置设置为value
+getrange key start end 取出key对应的值的部分字符串，从start的位置到end位置
+
+哈希（hash）命令：
+hset key field value 为key设置field的值为value
+hsetnx key field value 当key中的field不存在时设置field的值为value，否则不设置
+hget key field 获取key中的field属性的值
+hdel key field1 field2 删除key中多个field属性的值
+hlen key 获取key中的field的个数
+hmset key field1 value1 field2 value2 批量设置key中field1属性的值为value1， field2属性的值为value2
+hmget key field1 field2 批量获取key中field1, field2属性的值
+hexists key field 判断key中field属性是否存在
+hkeys key 获取所有key中的field属性
+hvals key 获取所有key中的field属性的值
+hgetall key 获取所有key中的field属性和对应的值
+hincrby key field value 将key中的field属性递增value的值
+
+列表（list）命令：
+rpush key value1 value2 value3 向key的列表左侧插入元素为value1，value2，value3
+lrange key 0 -1 检索列表key中所有的元素
+rpush key value1 value2 value3 向key的列表右侧插入元素为value1，value2，value3
+linsert key before value1 value2 向value1的前面插入value2
+linsert key after value1 value2 向value1的后面插入value2
+lrange key start end 获取索引值为start-end的列表元素（两头都包含）
+lindex key index 获取列表中索引值为index的元素
+llen key 获取列表key的长度
+lpop key 从列表左侧弹出元素，原列表的长度减一
+rpop key 从列表右侧弹出元素，原列表的长度减一
+lrem key number item 从列表左侧开始删除number个item元素
+ltrim key start end 修剪列表，将原来的列表元素变成从start到end的元素列表
+lset key index value 修改列表key的第index的元素为value
+blpop key 0 从左侧依次弹出元素，如果列表无元素，阻塞，直到另一个客户端执行了rpush操作后，再弹出这个元素
+brpop key 0 从右侧依次弹出元素，如果列表无元素，阻塞，直到另一个客户端执行了lpush操作后，再弹出这个元素
+
+集合（set）命令：
+sadd key value1 value2 向key集合中添加元素value1, value2
+srem key value1 value2 从key集合中删除value1，value2
+scard key 计算key集合中的元素个数
+sismember key value 判断value是不是key集合的元素
+srandmember key 随机返回一个key集合的元素
+spop key 随机弹出一个key集合的元素，原集合长度减一
+smembers key 获取key集合中的所有元素
+sinter set1 set2 求set1和set2的交集
+sunion set1 set2 求set1和set2的并集
+sdiff set1 set2 求set1和set2的差集
+sinterstore new_set set1 set2 求set1和set2的交集并将结果保存在new_set中
+sunionstore new_set set1 set2 求set1和set2的并集并将结果保存在new_set中
+sdiffstore new_set set1 set2 求set1和set2的差集并将结果保存在new_set中
+
+有序集合（zset）命令：
+zadd key score1 value1 score2 value2 向key集合中分别添加value1，分数为score1，value2，分数为score2
+zcard key 查询key集合中元素的个数
+zscore key value 查询key集合中value元素的分数
+zrank key value 计算key集合中value元素的排名（排名从0开始，从第到高计算）
+zrevrank key value 计算key集合中value元素的排名（排名从0开始，从高到低计算）
+zrem key value 删除key集合中value成员
+zincrby key step value 增加key集合中value元素的分数，增加step
+zrange key start end 返回指定排名范围内的成员，分数从低到高，不包含分数
+zrange key start end withscores 返回指定排名范围内的成员，分数从低到高，包含分数
+zrevrange key start end 返回指定排名范围内的成员，分数从高到低，不包含分数
+zrevrange key start end withscores 返回指定排名范围内的成员，分数从高到低，包含分数
+zrangebyscore key start end 返回指定分数范围内的成员，分数从低到高，不包含分数
+zrangebyscore key start end withscores 返回指定分数范围内的成员，分数从低到高，包含分数
+zrevrangebyscore key start end 返回指定分数范围内的成员，分数从高到低，不包含分数
+zrevrangebyscore key start end withscores 返回指定分数范围内的成员，分数从高到低，包含分数
+zcount key start end 返回指定分数区间范围内key集合的元素个数
+zremrangebyrank key start end 删除key集合中排名从start位置到end位置的所有元素
+zremrangebyscore key start end 删除key集合中分数范围从start到end的所有元素
+
+其他命令：
+rename oldname newname 将oldname的键重命名成newname的键
+renamenx oldname newname 只有在newname不存在这个键的时候才能修改成功，否则修改不成功
+randomkey 随机返回一个键的名字
+persist key 将键的过期时间清除
+select dbIndex 切换到第几个数据库上（redis默认有16个数据库，dbIndex的值是0-15）
+flushdb 清除当前数据库
+flushall 清除所有数据库
+
+事务的命令：
+multi
+set username1 aaa
+set username2 bbb
+exec -- 代表提交事务，这个时候get username1 get username2都有值
+
+
+multi
+set username1 aaa
+discard -- 代表丢弃事务，这个时候get username1没有值
+
+发布订阅
+客户端2：subscribe channel -- 订阅频道
+客户端1：publish channel "hello, world" -- 向频道中发布消息
+客户端2可以收到"hello, world"
+unsubscribe 取消频道的订阅
+
+

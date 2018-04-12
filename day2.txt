@@ -1,0 +1,99 @@
+redis cluster
+假设有6个redis实例，ip地址和redis端口号如下：
+10.34.1.161:6001
+10.34.1.161:6002
+10.34.1.161:6003
+10.34.1.161:6004
+10.34.1.161:6005
+10.34.1.161:6006
+
+规划如下
+10.34.1.161:6001 主
+10.34.1.161:6002 主
+10.34.1.161:6003 主
+10.34.1.161:6004 从
+10.34.1.161:6005 从
+10.34.1.161:6006 从
+
+安装步骤：
+****防火墙中开放6001-6006端口****
+1）修改每一个redis的redis.conf文件：
+port 对应的端口号
+daemonize yes #后台启动
+cluster-enabled yes #开启cluster，去掉注释
+cluster-config-file nodes.conf
+cluster-node-timeout 15000
+appendonly yes #开启AOF模式
+bind 10.34.1.161（也就是机器的ip地址，不是127.0.0.1）
+
+2）安装ruby环境
+yum install ruby
+yum install rubygems
+获取 redis-3.2.2.gem
+
+3）安装redis-3.2.2.gem
+gem install redis-3.2.2.gem
+
+4）启动所有的redis节点
+./redis-server redis.conf
+
+5）使用redis-trib.rb创建集群（使用create命令 --replicas 1 参数表示为每个主节点创建一个从节点，其他参数是实例的地址集合。）
+./redis-trib.rb create --replicas 1 10.34.1.161:6001 10.34.1.161:6002 10.34.1.161:6003 10.34.1.161:6004 10.34.1.161:6005 10.34.1.161:6006
+出现如下信息：
+>>> Creating cluster
+>>> Performing hash slots allocation on 6 nodes...
+Using 3 masters:
+10.34.1.161:6001
+10.34.1.161:6002
+10.34.1.161:6003
+Adding replica 10.34.1.161:6004 to 10.34.1.161:6001
+Adding replica 10.34.1.161:6005 to 10.34.1.161:6002
+Adding replica 10.34.1.161:6006 to 10.34.1.161:6003
+M: 09413fa65b82ed77feb57bad301e0505e995c098 10.34.1.161:6001
+   slots:0-5460 (5461 slots) master
+M: acfa5b5cb004fe491f45a8a5bb123b51a39b040c 10.34.1.161:6002
+   slots:5461-10922 (5462 slots) master
+M: 6d5ca1359eba0508a85cb9b3ba880dad5195ffea 10.34.1.161:6003
+   slots:10923-16383 (5461 slots) master
+S: 790350d7852a135407a59554d235d65c815d54c2 10.34.1.161:6004
+   replicates 09413fa65b82ed77feb57bad301e0505e995c098
+S: 41d775dcbdc2ffbaa3c563d7d1c43e4e68dbdc79 10.34.1.161:6005
+   replicates acfa5b5cb004fe491f45a8a5bb123b51a39b040c
+S: a3f32fd7a537bafbb46c24fd4070a69df8abb623 10.34.1.161:6006
+   replicates 6d5ca1359eba0508a85cb9b3ba880dad5195ffea
+Can I set the above configuration? (type 'yes' to accept): yes
+>>> Nodes configuration updated
+>>> Assign a different config epoch to each node
+>>> Sending CLUSTER MEET messages to join the cluster
+Waiting for the cluster to join.....
+>>> Performing Cluster Check (using node 10.34.1.161:6001)
+M: 09413fa65b82ed77feb57bad301e0505e995c098 10.34.1.161:6001
+   slots:0-5460 (5461 slots) master
+   1 additional replica(s)
+S: 41d775dcbdc2ffbaa3c563d7d1c43e4e68dbdc79 10.34.1.161:6005
+   slots: (0 slots) slave
+   replicates acfa5b5cb004fe491f45a8a5bb123b51a39b040c
+M: 6d5ca1359eba0508a85cb9b3ba880dad5195ffea 10.34.1.161:6003
+   slots:10923-16383 (5461 slots) master
+   1 additional replica(s)
+S: 790350d7852a135407a59554d235d65c815d54c2 10.34.1.161:6004
+   slots: (0 slots) slave
+   replicates 09413fa65b82ed77feb57bad301e0505e995c098
+S: a3f32fd7a537bafbb46c24fd4070a69df8abb623 10.34.1.161:6006
+   slots: (0 slots) slave
+   replicates 6d5ca1359eba0508a85cb9b3ba880dad5195ffea
+M: acfa5b5cb004fe491f45a8a5bb123b51a39b040c 10.34.1.161:6002
+   slots:5461-10922 (5462 slots) master
+   1 additional replica(s)
+[OK] All nodes agree about slots configuration.
+>>> Check for open slots...
+>>> Check slots coverage...
+[OK] All 16384 slots covered.
+
+redis集群链接测试：
+连接6001端口的redis
+./redis-cli -c -p 6001 -h 10.34.1.161
+各种命令....
+info replication 查看当前节点的信息（是主节点还是从节点等等）
+查看某个节点
+./redis-trib.rb check 10.34.1.161:6003
